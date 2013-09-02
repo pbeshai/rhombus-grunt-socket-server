@@ -13,7 +13,6 @@
 module.exports = function(grunt) {
   var ENV = process.env;
   var CWD = process.cwd();
-  var baseDir = CWD + "/web/"; // TODO: this should probably be an option.
 
   var path = require("path");
   var fs = require("fs");
@@ -57,6 +56,9 @@ module.exports = function(grunt) {
 
       webInit: null,
 
+      // these directories will not be available through a url
+      exclude: [ "node_modules", "log", "test" ],
+
       // Register default compiler mappings.
       middleware: {
         // Stylus.
@@ -77,10 +79,12 @@ module.exports = function(grunt) {
     });
 
     // Merge maps together. (maps urls to folders)
-    options.map = _.extend({}, fs.readdirSync(baseDir).filter(function(file) {
-      return file[0] !== "." && fs.statSync(baseDir + file).isDirectory();
+    options.map = _.extend({}, fs.readdirSync(CWD).filter(function(file) {
+      return file[0] !== "." &&
+        !_.contains(options.exclude, file) &&
+        fs.statSync(file).isDirectory();
     }).reduce(function(memo, current) {
-      memo[current] = baseDir + current;
+      memo[current] = current;
       return memo;
     }, {}), options.map);
 
@@ -132,13 +136,8 @@ module.exports = function(grunt) {
     _.each(options.middleware, function(callback, extension) {
       // Investigate if there is a better way of writing this.
       site.get(new RegExp(extension), function(req, res, next) {
-        var url = req.url;
-
-        // If there are query parameters, remove them.
-        url = url.split("?")[0];
-
         // Determine the correct asset path.
-        var path = options.map[url.slice(1)] || baseDir + url;
+        var path = getMappedFile(req.url);
 
         // Read in the file contents.
         fs.readFile(path, function(err, buffer) {
@@ -153,6 +152,24 @@ module.exports = function(grunt) {
       });
     });
 
+    function getMappedFile(url) {
+      url = url.split("?")[0];
+      var filename = url;
+
+      url = url.slice(options.root.length);
+
+      // sort in reverse so longer matches match first
+      Object.keys(options.map).sort().reverse().some(function (mapName) {
+        var dirMatch = grunt.file.isDir(options.map[mapName]) ? "/*" : "$";
+        if (url.match("^" + mapName + dirMatch)) {
+          filename = options.map[mapName] + url.slice(mapName.length);
+          return true;
+        }
+        return false;
+      });
+
+      return filename;
+    }
 
     // Map static folders to take precedence over redirection.
     Object.keys(options.map).sort().reverse().forEach(function(name) {
