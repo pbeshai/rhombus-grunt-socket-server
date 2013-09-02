@@ -1,0 +1,48 @@
+{
+  "name": "grunt-socket-server",
+  "description": "Grunt plugin to start a web server and a websocket server with socket.io",
+  "version": "0.1.0",
+  "homepage": "",
+  "author": {
+    "name": "Peter Beshai; Tim Brayen",
+    "email": "peter.beshai@gmail.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://pbeshai@remote.cs.ubc.ca/git/grunt-socket-server.git"
+  },
+  "bugs": {
+    "url": ""
+  },
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "/blob/master/LICENSE-MIT"
+    }
+  ],
+  "main": "Gruntfile.js",
+  "engines": {
+    "node": ">= 0.8.0"
+  },
+  "scripts": {
+    "test": "grunt test"
+  },
+  "dependencies": {
+    "express": "3.2.5",
+    "socket.io": "0.9.14",
+    "gzip-js": "0.3.2",
+    "grunt-lib-stylus": "*"
+  },
+  "devDependencies": {
+    "grunt-contrib-jshint": "~0.6.0",
+    "grunt-contrib-clean": "~0.4.0",
+    "grunt-contrib-nodeunit": "~0.2.0",
+    "grunt": "~0.4.1"
+  },
+  "peerDependencies": {
+    "grunt": "~0.4.1"
+  },
+  "keywords": [
+    "gruntplugin"
+  ]
+}
