@@ -62,21 +62,25 @@ module.exports = function(grunt) {
       // Register default compiler mappings.
       middleware: {
         // Stylus.
-        "\\.styl$": function(buffer, req, res, next) {
-          var stylus = require("grunt-lib-stylus").init(grunt);
-          var contentType = "text/css";
-          var opts = {
-            paths: ["." + req.url.split("/").slice(0, -1).join("/") + "/"]
-          };
-
-          // Compile the source.
-          stylus.compile(String(buffer), opts, function(contents) {
-            res.header("Content-type", contentType);
-            next(contents);
-          });
-        },
+        "\\.styl$": compileStylus,
       },
     });
+
+    function compileStylus(buffer, req, res, next) {
+      var stylus = require("grunt-lib-stylus").init(grunt);
+      var contentType = "text/css";
+      var mappedFile = getMappedFile(req.url, options);
+      var mappedDir = mappedFile.split("/").slice(0, -1).join("/");
+
+      var opts = {
+        paths: ["./" + mappedDir + "/" ]
+      };
+      // Compile the source.
+      stylus.compile(String(buffer), opts, function(contents) {
+        res.header("Content-type", contentType);
+        next(contents);
+      });
+    }
 
     // Merge maps together. (maps urls to folders)
     options.map = _.extend({}, fs.readdirSync(CWD).filter(function(file) {
@@ -110,10 +114,30 @@ module.exports = function(grunt) {
       };
     }
 
+
+
     // Run the server.
     run(options);
-
   });
+
+  function getMappedFile(url, options) {
+    url = url.split("?")[0];
+    var filename = url;
+
+    url = url.slice(options.root.length);
+
+    // sort in reverse so longer matches match first
+    Object.keys(options.map).sort().reverse().some(function (mapName) {
+      var dirMatch = grunt.file.isDir(options.map[mapName]) ? "/*" : "$";
+      if (url.match("^" + mapName + dirMatch)) {
+        filename = options.map[mapName] + url.slice(mapName.length);
+        return true;
+      }
+      return false;
+    });
+
+    return filename;
+  }
 
   // Actually run the server...
   function run(options) {
@@ -137,7 +161,7 @@ module.exports = function(grunt) {
       // Investigate if there is a better way of writing this.
       site.get(new RegExp(extension), function(req, res, next) {
         // Determine the correct asset path.
-        var path = getMappedFile(req.url);
+        var path = getMappedFile(req.url, options);
 
         // Read in the file contents.
         fs.readFile(path, function(err, buffer) {
@@ -151,25 +175,6 @@ module.exports = function(grunt) {
         });
       });
     });
-
-    function getMappedFile(url) {
-      url = url.split("?")[0];
-      var filename = url;
-
-      url = url.slice(options.root.length);
-
-      // sort in reverse so longer matches match first
-      Object.keys(options.map).sort().reverse().some(function (mapName) {
-        var dirMatch = grunt.file.isDir(options.map[mapName]) ? "/*" : "$";
-        if (url.match("^" + mapName + dirMatch)) {
-          filename = options.map[mapName] + url.slice(mapName.length);
-          return true;
-        }
-        return false;
-      });
-
-      return filename;
-    }
 
     // Map static folders to take precedence over redirection.
     Object.keys(options.map).sort().reverse().forEach(function(name) {
