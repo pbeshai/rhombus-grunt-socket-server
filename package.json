@@ -11,9 +11,6 @@
     "type": "git",
     "url": "git://pbeshai@remote.cs.ubc.ca/git/grunt-socket-server.git"
   },
-  "bugs": {
-    "url": ""
-  },
   "licenses": [
     {
       "type": "MIT",
