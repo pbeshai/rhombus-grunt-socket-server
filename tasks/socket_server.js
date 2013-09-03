@@ -33,8 +33,8 @@ module.exports = function(grunt) {
       baseDir: "", // relative current working directory
 
       // Fundamentals.
-      favicon: "favicon.ico",
-      index: "index.html",
+      favicon: null, // defaults to baseDir/favicon.ico
+      index: null, // defaults to baseDir/index.html
 
       // Should this router automatically handle pushState requests.
       pushState: true,
@@ -67,6 +67,9 @@ module.exports = function(grunt) {
         "\\.styl$": compileStylus,
       },
     });
+
+    options.favicon = options.favicon || options.baseDir + "favicon.ico";
+    options.index =  options.index || options.baseDir + "index.html";
 
     function compileStylus(buffer, req, res, next) {
       var stylus = require("grunt-lib-stylus").init(grunt);
