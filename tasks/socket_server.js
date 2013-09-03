@@ -30,9 +30,11 @@ module.exports = function(grunt) {
   grunt.registerMultiTask("socket-server", "Run web server with socket.io.", function() {
 
     var options = this.options({
+      baseDir: "", // relative current working directory
+
       // Fundamentals.
       favicon: "favicon.ico",
-      index: "web/index.html",
+      index: "index.html",
 
       // Should this router automatically handle pushState requests.
       pushState: true,
@@ -75,20 +77,21 @@ module.exports = function(grunt) {
       var opts = {
         paths: ["./" + mappedDir + "/" ]
       };
+
       // Compile the source.
-      stylus.compile(String(buffer), opts, function(contents) {
+      stylus.compile(String(buffer), opts, function (contents) {
         res.header("Content-type", contentType);
         next(contents);
       });
     }
 
     // Merge maps together. (maps urls to folders)
-    options.map = _.extend({}, fs.readdirSync(CWD).filter(function(file) {
+    options.map = _.extend({}, fs.readdirSync(options.baseDir).filter(function(file) {
       return file[0] !== "." &&
         !_.contains(options.exclude, file) &&
-        fs.statSync(file).isDirectory();
+        fs.statSync(options.baseDir + file).isDirectory();
     }).reduce(function(memo, current) {
-      memo[current] = current;
+      memo[current] = options.baseDir + current;
       return memo;
     }, {}), options.map);
 
