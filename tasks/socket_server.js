@@ -161,7 +161,7 @@ module.exports = function(grunt) {
     }
 
     // setup bodyparser
-    site.use(bodyParser());
+    site.use(bodyParser({ limit: '50mb' }));
 
     // setup favicon
     site.use(favicon(options.favicon));
