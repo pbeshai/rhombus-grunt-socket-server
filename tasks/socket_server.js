@@ -23,6 +23,9 @@ module.exports = function(grunt) {
   var express = require("express");
   var gzip = require("gzip-js");
   var socketio = require("socket.io");
+  var bodyParser = require('body-parser');
+  var favicon = require('serve-favicon');
+  var compress = require('compression');
 
   // Shorthand Lo-Dash.
   var _ = grunt.util._;
@@ -84,7 +87,8 @@ module.exports = function(grunt) {
       // Compile the source.
       stylus.compile(String(buffer), opts, function (contents) {
         res.header("Content-type", contentType);
-        next(contents);
+        // next(contents);
+        res.send(200, contents);
       });
     }
 
@@ -153,14 +157,14 @@ module.exports = function(grunt) {
 
     // Allow compression to be disabled.
     if (options.gzip !== false) {
-      site.use(express.compress());
+      site.use(compress());
     }
 
     // setup bodyparser
-    site.use(express.bodyParser());
+    site.use(bodyParser());
 
     // setup favicon
-    site.use(express.favicon(options.favicon));
+    site.use(favicon(options.favicon));
 
     // Go through each compiler and provide an identical serving experience.
     _.each(options.middleware, function(callback, extension) {
