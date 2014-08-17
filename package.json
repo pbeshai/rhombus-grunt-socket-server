@@ -35,7 +35,7 @@
     "grunt-lib-stylus": "*",
     "gzip-js": "0.3.2",
     "serve-favicon": "^2.0.1",
-    "socket.io": "^1.0.4"
+    "socket.io": "1.0.4"
   },
   "devDependencies": {
     "grunt-contrib-jshint": "~0.6.0",
